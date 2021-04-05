@@ -28,22 +28,21 @@ public class CrudWishList {
   }
 
   public WishListItem addItem(final String customerId, final String storeId,
-      final String productId) throws MaxItemsExceededException, DuplicateItemException{
-
+      final String productId) throws MaxItemsExceededException, DuplicateItemException {
     validInsertItem(customerId, storeId, productId);
     return wishListGateway.insertItem(buildItem(customerId, storeId, productId));
 
   }
 
   public void deleteItem(final String customerId, final String storeId,
-      final String productId) throws DeleteItemNotFoundException  {
-
-    Stream
-        .of(wishListGateway
-            .deleteByCustomerIdAndStoreIdAndProductId(customerId, storeId, productId))
-        .filter(aLong -> aLong.equals(DELETE_ITEM_FOUND))
-        .findAny()
-        .orElseThrow(() -> new DeleteItemNotFoundException(customerId, storeId, productId));
+      final String productId) throws DeleteItemNotFoundException {
+    validDeleteItem(
+        customerId,
+        storeId,
+        productId,
+        wishListGateway
+            .deleteByCustomerIdAndStoreIdAndProductId(customerId, storeId, productId)
+    );
   }
 
   private void validInsertItem(final String customerId, final String storeId,
@@ -51,11 +50,12 @@ public class CrudWishList {
     final List<WishListItem> itemList = getAllItems(customerId, storeId);
 
     validDuplicateItemProduct(customerId, storeId, productId, itemList);
-    validMaxItems (customerId, storeId, itemList.size());
+    validMaxItems(customerId, storeId, itemList.size());
 
   }
 
-  private void validDuplicateItemProduct(final String customerId, final String storeId, final String productId,
+  private void validDuplicateItemProduct(final String customerId, final String storeId,
+      final String productId,
       final List<WishListItem> itemList) {
     itemList
         .stream()
@@ -72,6 +72,15 @@ public class CrudWishList {
         .filter(aInt -> aInt < MAX_ITEMS_LIMIT)
         .findAny()
         .orElseThrow(() -> new MaxItemsExceededException(customerId, storeId));
+  }
+
+  private void validDeleteItem(final String customerId, final String storeId,
+      final String productId, final Long deleteId) {
+    Stream
+        .of(deleteId)
+        .filter(aLong -> aLong.equals(DELETE_ITEM_FOUND))
+        .findAny()
+        .orElseThrow(() -> new DeleteItemNotFoundException(customerId, storeId, productId));
   }
 
   private WishListItem buildItem(final String customerId, final String storeId,
