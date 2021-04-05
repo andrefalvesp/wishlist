@@ -5,12 +5,12 @@ Is a Spring Boot based application exposing a REST API to CRUD a wish list.
 The application is based on the following projects:
 
 * **Spring boot** 2.5.0-SNAPSHOT
-* **Spring cloud** 2020.0.2-SNAPSHOT
+* **Spring Data - Mongo** 3.2.0-M5
 * **JUnit** 4.13.2
 * **Mockito** 3.8.0
 * **Maven** 3.8.1
 * **Project Lombok** 1.18.18
-* **Java** 11
+* **Java** 15
 
 ## Software Principles
 * Clean Architecture: software design principles that allow for SOLID layering of the app, making the app scalable, agile and robust.
