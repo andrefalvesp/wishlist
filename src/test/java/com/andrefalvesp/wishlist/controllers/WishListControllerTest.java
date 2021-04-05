@@ -1,9 +1,9 @@
 package com.andrefalvesp.wishlist.controllers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -148,7 +148,7 @@ public class WishListControllerTest {
   }
 
   @Test
-  public void give_DuplicateProductException_When_AddItem_Then_Success() throws Exception {
+  public void give_InvalidParams_When_AddItem_Then_DuplicateItemException() throws Exception {
 
     final var customerId = "1234567890";
     final var storeId = "L_NETSHOES";
@@ -167,16 +167,13 @@ public class WishListControllerTest {
     ).andReturn();
 
     assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.BAD_REQUEST.value()));
-    assertThrows(DuplicateItemException.class,
-        () -> {
-          throw new DuplicateItemException(customerId, storeId, productId);
-        });
+    assertThat(mvcResult.getResolvedException(), instanceOf(DuplicateItemException.class));
     verify(crudWishList, times(1)).addItem(customerId, storeId, productId);
 
   }
 
   @Test
-  public void give_MaxItemsExceededException_When_AddItem_Then_Success() throws Exception {
+  public void give_InsertMoreThenMaxItemsAllowed_When_AddItem_Then_MaxItemsExceededException() throws Exception {
 
     final var customerId = "1234567890";
     final var storeId = "L_NETSHOES";
@@ -195,10 +192,7 @@ public class WishListControllerTest {
     ).andReturn();
 
     assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.BAD_REQUEST.value()));
-    assertThrows(MaxItemsExceededException.class,
-        () -> {
-          throw new MaxItemsExceededException(customerId, storeId);
-        });
+    assertThat(mvcResult.getResolvedException(), instanceOf(MaxItemsExceededException.class));
     verify(crudWishList, times(1)).addItem(customerId, storeId, productId);
 
   }
@@ -225,13 +219,13 @@ public class WishListControllerTest {
   }
 
   @Test
-  public void give_DeleteItemNotFoundException_When_DeleteItem_Then_Success() throws Exception {
+  public void give_InvalidParams_When_DeleteItem_Then_DeleteItemNotFoundException() throws Exception {
 
     final var customerId = "1234567890";
     final var storeId = "L_NETSHOES";
     final var productId = "8888888888";
 
-    doThrow(DeleteItemNotFoundException.class).when(crudWishList).deleteItem(customerId, storeId, productId);
+    doThrow(new DeleteItemNotFoundException(customerId, storeId, productId)).when(crudWishList).deleteItem(customerId, storeId, productId);
 
     final MvcResult mvcResult = mockMvc.perform(delete(API_URL)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -243,11 +237,8 @@ public class WishListControllerTest {
     ).andReturn();
 
     assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.NOT_FOUND.value()));
-    assertThrows(DeleteItemNotFoundException.class,
-        () -> {
-          throw new DeleteItemNotFoundException(customerId, storeId, productId);
-        });
-    verify(crudWishList, times(1)).deleteItem(customerId, storeId, productId);
+    assertThat(mvcResult.getResolvedException(), instanceOf(DeleteItemNotFoundException.class));
+  verify(crudWishList, times(1)).deleteItem(customerId, storeId, productId);
 
   }
 }
