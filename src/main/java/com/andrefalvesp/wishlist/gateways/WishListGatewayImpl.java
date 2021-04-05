@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class WishListGatewayImpl implements WishListGateway {
 
-  @Autowired
   private final WishListRepository wishListRepository;
 
   @Override
